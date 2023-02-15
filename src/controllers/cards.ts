@@ -7,7 +7,7 @@ import NotFoundError from "../errors/not-found-err";
 export const getCards = (req: Request, res: Response) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(500).send({ message: "Ошибка на стороне сервера" }));
+    .catch(() => res.status(500).send({ message: "На сервере произошла ошибка" }));
 };
 
 export const createCard = (req: IRequestWhithUser, res: Response) => {
@@ -22,7 +22,7 @@ export const createCard = (req: IRequestWhithUser, res: Response) => {
           .status(400)
           .send({ message: "Переданы некорректные данные" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -45,7 +45,7 @@ export const deleteCardById = (req: Request, res: Response) => {
           .status(400)
           .send({ message: "Переданный id карточки не валиден" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -78,7 +78,7 @@ export const addLikeById = (req: IRequestWhithUser, res: Response) => {
           .status(400)
           .send({ message: "Переданы некорректные данные" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -102,6 +102,6 @@ export const deleteLikeById = (req: IRequestWhithUser, res: Response) => {
           .status(400)
           .send({ message: "Переданный id карточки не валиден" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };

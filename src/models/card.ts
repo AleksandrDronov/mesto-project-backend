@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { model, Schema } from "mongoose";
 
 export interface ICard {
@@ -18,6 +19,12 @@ const cardSchema = new Schema<ICard>({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator(v: string) {
+        return /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(v);
+      },
+      message: "Введите url", // выводится в случае false
+    },
   },
   likes: {
     type: [

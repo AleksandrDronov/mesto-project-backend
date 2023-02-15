@@ -7,7 +7,7 @@ import NotFoundError from "../errors/not-found-err";
 export const getUsers = (req: Request, res: Response) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: "Ошибка на стороне сервера" }));
+    .catch(() => res.status(500).send({ message: "На сервере произошла ошибка" }));
 };
 
 export const createUser = (req: Request, res: Response) => {
@@ -20,7 +20,7 @@ export const createUser = (req: Request, res: Response) => {
           .status(400)
           .send({ message: "Переданы некорректные данные" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -42,7 +42,7 @@ export const getUserById = (req: Request, res: Response) => {
           .status(400)
           .send({ message: "Переданный id пользователя не валиден" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -75,7 +75,7 @@ export const updateUser = (req: IRequestWhithUser, res: Response) => {
           .status(400)
           .send({ message: "Переданы некорректные данные" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -104,6 +104,6 @@ export const updateUserAvatar = (req: IRequestWhithUser, res: Response) => {
           .status(400)
           .send({ message: "Переданы некорректные данные" });
       }
-      return res.status(500).send({ message: "Ошибка на стороне сервера" });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };

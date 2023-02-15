@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { model, Schema } from "mongoose";
 
 export interface IUser {
@@ -22,6 +23,12 @@ const userSchema = new Schema<IUser>({
   avatar: {
     type: String,
     required: true,
+    validate: {
+      validator(v: string) {
+        return /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/.test(v);
+      },
+      message: "Введите url", // выводится в случае false
+    },
   },
 });
 
