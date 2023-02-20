@@ -4,6 +4,7 @@ import usersRouter from "./routes/users";
 import cardsRouter from "./routes/cards";
 import { IRequestWhithUser } from "./utils/types";
 import { PORT, URL_BD } from "./config";
+import { login, createUser } from "./controllers/users";
 
 const app = express();
 
@@ -15,7 +16,7 @@ mongoose.connect(URL_BD);
 
 app.use((req: IRequestWhithUser, res: Response, next: NextFunction) => {
   req.user = {
-    _id: "63eb6a678890ff9caab7f7fa", // вставьте сюда _id созданного в предыдущем пункте пользователя
+    _id: "63f251385dd05c3d13a1608f", // вставьте сюда _id созданного в предыдущем пункте пользователя
   };
 
   next();
@@ -23,6 +24,8 @@ app.use((req: IRequestWhithUser, res: Response, next: NextFunction) => {
 
 app.use("/users", usersRouter);
 app.use("/cards", cardsRouter);
+app.post("/signin", login);
+app.post("/signup", createUser);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
