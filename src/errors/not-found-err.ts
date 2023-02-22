@@ -1,9 +1,4 @@
-interface INotFoundError {
-  message: string,
-  statusCode: number
-}
-
-class NotFoundError extends Error implements INotFoundError {
+class NotFoundError extends Error {
   statusCode: number;
 
   constructor(message: string) {

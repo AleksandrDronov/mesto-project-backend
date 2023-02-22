@@ -1,22 +1,25 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
 import { IRequestWhithUser } from "../utils/types";
 import NotFoundError from "../errors/not-found-err";
 import AuthError from "../errors/auth-err";
+import ServerError from "../errors/server-err";
+import ValidationError from "../errors/validation-err";
+import ConflictError from "../errors/conflict-err";
 
 dotenv.config();
 
-export const getUsers = (req: Request, res: Response) => {
+export const getUsers = (req: Request, res: Response, next: NextFunction) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: "На сервере произошла ошибка" }));
+    .catch(() => next(new ServerError("На сервере произошла ошибка")));
 };
 
-export const createUser = (req: Request, res: Response) => {
+export const createUser = (req: Request, res: Response, next: NextFunction) => {
   const {
     name,
     about,
@@ -35,15 +38,16 @@ export const createUser = (req: Request, res: Response) => {
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res
-          .status(400)
-          .send({ message: "Переданы некорректные данные" });
+        return next(new ValidationError("Переданы некорректные данные"));
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      if (err.code === 11000) {
+        return next(new ConflictError("Такой email уже используется"));
+      }
+      return next(new ServerError("На сервере произошла ошибка"));
     });
 };
 
-export const getUserById = (req: Request, res: Response) => {
+export const getUserById = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
   User.findById(userId)
     .then((user) => {
@@ -53,22 +57,19 @@ export const getUserById = (req: Request, res: Response) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err instanceof NotFoundError && err.statusCode === 404) {
-        return res.status(err.statusCode).send({ message: err.message });
+      if (err instanceof NotFoundError) {
+        return next(err);
       }
       if (err instanceof mongoose.Error.CastError) {
-        return res
-          .status(400)
-          .send({ message: "Переданный id пользователя не валиден" });
+        return next(new ValidationError("Переданы некорректные данные"));
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return next(new ServerError("На сервере произошла ошибка"));
     });
 };
 
-export const updateUser = (req: IRequestWhithUser, res: Response) => {
+export const updateUser = (req: IRequestWhithUser, res: Response, next: NextFunction) => {
   const { name, about } = req.body;
   const id = req.user?._id;
-
   User.findByIdAndUpdate(
     id,
     { name, about },
@@ -81,24 +82,17 @@ export const updateUser = (req: IRequestWhithUser, res: Response) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err instanceof NotFoundError && err.statusCode === 404) {
-        return res.status(err.statusCode).send({ message: err.message });
+      if (err instanceof NotFoundError) {
+        return next(err);
       }
       if (err instanceof mongoose.Error.CastError) {
-        return res
-          .status(400)
-          .send({ message: "Переданный id пользователя не валиден" });
+        return next(new ValidationError("Переданы некорректные данные"));
       }
-      if (err.name === "ValidationError") {
-        return res
-          .status(400)
-          .send({ message: "Переданы некорректные данные" });
-      }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return next(new ServerError("На сервере произошла ошибка"));
     });
 };
 
-export const updateUserAvatar = (req: IRequestWhithUser, res: Response) => {
+export const updateUserAvatar = (req: IRequestWhithUser, res: Response, next: NextFunction) => {
   const { avatar } = req.body;
   const id = req.user?._id;
 
@@ -110,24 +104,17 @@ export const updateUserAvatar = (req: IRequestWhithUser, res: Response) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err instanceof NotFoundError && err.statusCode === 404) {
-        return res.status(err.statusCode).send({ message: err.message });
+      if (err instanceof NotFoundError) {
+        return next(err);
       }
       if (err instanceof mongoose.Error.CastError) {
-        return res
-          .status(400)
-          .send({ message: "Переданный id пользователя не валиден" });
+        return next(new ValidationError("Переданы некорректные данные"));
       }
-      if (err.name === "ValidationError") {
-        return res
-          .status(400)
-          .send({ message: "Переданы некорректные данные" });
-      }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return next(new ServerError("На сервере произошла ошибка"));
     });
 };
 
-export const login = (req: Request, res: Response) => {
+export const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -143,17 +130,15 @@ export const login = (req: Request, res: Response) => {
       }
     })
     .catch((err) => {
-      if (err instanceof AuthError && err.statusCode === 401) {
-        return res.status(err.statusCode).send({ message: err.message });
+      if (err instanceof AuthError) {
+        return next(err);
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return next(new ServerError("На сервере произошла ошибка"));
     });
 };
 
-export const getCurrentUser = (req: IRequestWhithUser, res: Response) => {
+export const getCurrentUser = (req: IRequestWhithUser, res: Response, next: NextFunction) => {
   const id = req.user?._id;
-  // eslint-disable-next-line no-console
-  console.log(id);
 
   User.findById(id)
     .then((user) => {
@@ -163,14 +148,12 @@ export const getCurrentUser = (req: IRequestWhithUser, res: Response) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err instanceof NotFoundError && err.statusCode === 404) {
-        return res.status(err.statusCode).send({ message: err.message });
+      if (err instanceof NotFoundError) {
+        return next(err);
       }
       if (err instanceof mongoose.Error.CastError) {
-        return res
-          .status(400)
-          .send({ message: "Переданный id пользователя не валиден" });
+        return next(new ValidationError("Переданы некорректные данные"));
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return next(new ServerError("На сервере произошла ошибка"));
     });
 };

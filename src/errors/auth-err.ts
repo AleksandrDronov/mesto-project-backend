@@ -1,9 +1,4 @@
-interface IAuthError {
-  message: string,
-  statusCode: number
-}
-
-class AuthError extends Error implements IAuthError {
+class AuthError extends Error {
   statusCode: number;
 
   constructor(message: string) {

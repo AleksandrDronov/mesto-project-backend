@@ -1,8 +1,8 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import dotenv from "dotenv";
 import { NextFunction, Response } from "express";
 import jwt from "jsonwebtoken";
 import { ISessionRequest } from "../utils/types";
+import AuthError from "../errors/auth-err";
 
 dotenv.config();
 
@@ -11,9 +11,8 @@ export default (req: ISessionRequest, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .send({ message: "Необходима авторизация" });
+    next(new AuthError("Необходима авторизация"));
+    return;
   }
 
   const token = authorization.replace("Bearer ", "");
@@ -23,9 +22,8 @@ export default (req: ISessionRequest, res: Response, next: NextFunction) => {
   try {
     if (JWT_SECRET) payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return res
-      .status(401)
-      .send({ message: "Необходима авторизация" });
+    next(new AuthError("Необходима авторизация"));
+    return;
   }
 
   req.user = payload;

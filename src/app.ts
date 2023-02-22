@@ -1,10 +1,14 @@
-import express, { Response, NextFunction } from "express";
+/* eslint-disable no-useless-escape */
+import express from "express";
 import mongoose from "mongoose";
+import { celebrate, Joi, errors } from "celebrate";
 import usersRouter from "./routes/users";
 import cardsRouter from "./routes/cards";
-import { IRequestWhithUser } from "./utils/types";
 import { PORT, URL_BD } from "./config";
 import { login, createUser } from "./controllers/users";
+import auth from "./middlewares/auth";
+import error from "./middlewares/errors";
+import { requestLogger, errorLogger } from "./middlewares/logger";
 
 const app = express();
 
@@ -14,18 +18,35 @@ app.use(express.urlencoded({ extended: true }));
 mongoose.set("strictQuery", true);
 mongoose.connect(URL_BD);
 
-app.use((req: IRequestWhithUser, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: "63f251385dd05c3d13a1608f", // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
+app.use(requestLogger);
 
-  next();
-});
+app.post("/signin", celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(6),
+  }),
+}), login);
+
+app.post("/signup", celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(200),
+    avatar: Joi.string().pattern(/^(https?:\/\/)([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/),
+    email: Joi.string().required().email(),
+    password: Joi.string().required().min(6),
+  }),
+}), createUser);
+
+app.use(auth);
 
 app.use("/users", usersRouter);
 app.use("/cards", cardsRouter);
-app.post("/signin", login);
-app.post("/signup", createUser);
+
+app.use(errorLogger);
+
+app.use(errors());
+
+app.use(error);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
