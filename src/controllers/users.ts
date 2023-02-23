@@ -125,15 +125,13 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      const { JWT_SECRET } = process.env;
-      if (JWT_SECRET) {
-        const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-        res.cookie("jwt", token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-          sameSite: true,
-        });
-      }
+      const { JWT_SECRET = "secret_key" } = process.env;
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+      res.cookie("jwt", token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      }).send({ message: "Пользователь успешно авторизован" });
     })
     .catch((err) => {
       if (err instanceof AuthError) {

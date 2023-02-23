@@ -6,10 +6,9 @@ import AuthError from "../errors/auth-err";
 
 dotenv.config();
 
-// eslint-disable-next-line consistent-return
 export default (req: ISessionRequest, res: Response, next: NextFunction) => {
   const token = req.cookies.jwt;
-  const { JWT_SECRET } = process.env;
+  const { JWT_SECRET = "secret_key" } = process.env;
   let payload;
 
   try {
