@@ -41,7 +41,7 @@ export const deleteCardById = (req: IRequestWhithUser, res: Response, next: Next
       if (card.owner.id !== userId) {
         throw new ForbiddenError("Чужая карточка");
       }
-      Card.remove(card)
+      card.remove()
         .then((deleteCard) => res.send(deleteCard));
     })
     .catch((err) => {
