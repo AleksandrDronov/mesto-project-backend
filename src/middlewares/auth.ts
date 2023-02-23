@@ -8,14 +8,7 @@ dotenv.config();
 
 // eslint-disable-next-line consistent-return
 export default (req: ISessionRequest, res: Response, next: NextFunction) => {
-  const { authorization } = req.headers;
-
-  if (!authorization || !authorization.startsWith("Bearer ")) {
-    next(new AuthError("Необходима авторизация"));
-    return;
-  }
-
-  const token = authorization.replace("Bearer ", "");
+  const token = req.cookies.jwt;
   const { JWT_SECRET } = process.env;
   let payload;
 

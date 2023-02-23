@@ -1,7 +1,8 @@
 /* eslint-disable no-useless-escape */
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { celebrate, Joi, errors } from "celebrate";
+import cookieParser from "cookie-parser";
 import usersRouter from "./routes/users";
 import cardsRouter from "./routes/cards";
 import { PORT, URL_BD } from "./config";
@@ -9,11 +10,13 @@ import { login, createUser } from "./controllers/users";
 import auth from "./middlewares/auth";
 import error from "./middlewares/errors";
 import { requestLogger, errorLogger } from "./middlewares/logger";
+import NotFoundError from "./errors/not-found-err";
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 mongoose.set("strictQuery", true);
 mongoose.connect(URL_BD);
@@ -41,6 +44,10 @@ app.use(auth);
 
 app.use("/users", usersRouter);
 app.use("/cards", cardsRouter);
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  next(new NotFoundError("Не верный путь"));
+});
 
 app.use(errorLogger);
 

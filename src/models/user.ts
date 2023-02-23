@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable no-useless-escape */
 import mongoose, { model, Schema } from "mongoose";
 import validator from "validator";

@@ -35,7 +35,13 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(201).send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((err) => {
       if (err.name === "ValidationError") {
         return next(new ValidationError("Переданы некорректные данные"));
@@ -126,7 +132,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
           sameSite: true,
-        }).send({ token });
+        });
       }
     })
     .catch((err) => {
