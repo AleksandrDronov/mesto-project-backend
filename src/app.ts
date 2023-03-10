@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { celebrate, Joi, errors } from "celebrate";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 import usersRouter from "./routes/users";
 import cardsRouter from "./routes/cards";
 import { PORT, URL_BD } from "./config";
@@ -14,6 +15,7 @@ import NotFoundError from "./errors/not-found-err";
 
 const app = express();
 
+app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
