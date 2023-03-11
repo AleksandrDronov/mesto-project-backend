@@ -12,7 +12,7 @@ export default (req: ISessionRequest, res: Response, next: NextFunction) => {
   let payload;
 
   try {
-    if (JWT_SECRET) payload = jwt.verify(token, JWT_SECRET);
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
     next(new AuthError("Необходима авторизация"));
     return;
